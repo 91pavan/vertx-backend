@@ -3,7 +3,7 @@ FROM vertx/vertx3
 
 #                                                       
 ENV VERTICLE_NAME com.cisco.cmad.vertx_backend.App
-ENV VERTICLE_FILE target/vertx-backend-0.0.1-SNAPSHOT.jar
+ENV VERTICLE_FILE target/vertx-backend-0.0.1-SNAPSHOT-jar-with-dependencies.jar
 
 # Set the location of the verticles
 ENV VERTICLE_HOME /usr/verticles
