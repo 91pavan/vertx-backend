@@ -4,3 +4,4 @@ file-uploads
 .project
 .classpath
 .vertx
+bin/

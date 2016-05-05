@@ -3,9 +3,12 @@ package com.cisco.cmad.vertx_backend;
 import java.io.IOException;
 import java.util.List;
 
+
 import org.mongodb.morphia.Datastore;
 
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 
 import io.vertx.ext.mongo.MongoClient;
 import io.vertx.core.AbstractVerticle;
@@ -17,6 +20,7 @@ import io.vertx.core.VertxOptions;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Cookie;
 import io.vertx.ext.web.Router;
@@ -109,6 +113,8 @@ public class App extends AbstractVerticle
     	
     	searchBlogsWithTags(router);
     	
+    	submitComments(router);
+    	
     	//post API
     	 // postAPI(router);
     	
@@ -149,6 +155,8 @@ public class App extends AbstractVerticle
 
 		      JsonObject blogDetails = ctx.getBodyAsJson();
 		      
+		      
+		      
 		      client.findOne("blogs", new JsonObject().put("title", blogDetails.getString("title"))
 		      , null, lookup -> {
 		    		    	 
@@ -166,6 +174,8 @@ public class App extends AbstractVerticle
 	            
 		      } else {
 		    	  
+		    	  JsonArray comments = new JsonArray();
+	              blogDetails.put("comments", comments);
 		    	  
 		    	  client.insert("blogs", blogDetails, insert -> {
 		              // error handling
@@ -173,10 +183,11 @@ public class App extends AbstractVerticle
 		                ctx.fail(500);
 		                return;
 		              }
+		              
 
 		              // add the generated id to the user object
 		              blogDetails.put("_id", insert.result());
-
+		              
 		              ctx.response().putHeader(HttpHeaders.CONTENT_TYPE, "application/json");
 		              System.out.println(blogDetails.encode());
 		              ctx.response().end(blogDetails.encode());
@@ -188,6 +199,61 @@ public class App extends AbstractVerticle
     	});
     }
     
+    
+    public void submitComments(Router router) {
+    	router.post("/Services/rest/blogs/:id/comments").handler(ctx -> {
+    		
+    		  String blogId = ctx.request().getParam("id");
+
+		      JsonObject blogComments = ctx.getBodyAsJson();
+		      
+		      System.out.println(blogComments);
+		      
+		      client.findOne("blogs", new JsonObject().put("_id", blogId)
+		      , null, lookup -> {
+		    		    	 
+		      // error handling
+		      if (lookup.failed()) {
+		        ctx.fail(500);
+		        return;
+		      }
+		
+		      JsonObject blog = lookup.result();
+		      		
+		      if (blog == null) {
+			    // does not exists
+		    	  ctx.fail(500);
+	            
+		      } else {
+		    	  
+	              JsonArray comments = blog.getJsonArray("comments");
+
+		    	  
+	              comments.add(blogComments);
+	              
+	              blog.put("comments", comments);
+	              
+		    	  client.save("blogs", blog, insert -> {
+		              // error handling
+		              if (insert.failed()) {
+		                ctx.fail(500);
+		                return;
+		              }
+		              
+
+		              // add the generated id to the user object
+		              
+		              ctx.response().putHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+		              System.out.println(blog.encode());
+		              ctx.response().end(blogComments.encode());
+		            });
+		    	  
+		   
+		      }
+    	      
+    	    });
+    	});
+    }
     
     public void loginUser(Router router) {
     	router.post("/Services/rest/user/auth").handler(ctx -> {
