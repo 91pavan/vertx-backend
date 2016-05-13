@@ -3,12 +3,12 @@ FROM vertx/vertx3
 
 #                                                       
 ENV VERTICLE_NAME com.cisco.cmad.vertx_backend.App
-ENV VERTICLE_FILE target/vertx-backend-0.0.1-SNAPSHOT-jar-with-dependencies.jar
+ENV VERTICLE_FILE vertx-backend-0.0.1-SNAPSHOT-jar-with-dependencies.jar
 
 # Set the location of the verticles
 ENV VERTICLE_HOME /usr/verticles
 
-EXPOSE 8888
+EXPOSE 8084
 
 # Copy your verticle to the container                   
 COPY $VERTICLE_FILE $VERTICLE_HOME/
