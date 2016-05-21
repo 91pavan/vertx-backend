@@ -154,9 +154,6 @@ public class App extends AbstractVerticle
     	router.post("/Services/rest/blogs").handler(ctx -> {
 
 		      JsonObject blogDetails = ctx.getBodyAsJson();
-		      
-		      
-		      
 		      client.findOne("blogs", new JsonObject().put("title", blogDetails.getString("title"))
 		      , null, lookup -> {
 		    		    	 
@@ -239,10 +236,9 @@ public class App extends AbstractVerticle
 		                ctx.fail(500);
 		                return;
 		              }
-		              
 
 		              // add the generated id to the user object
-		              
+
 		              ctx.response().putHeader(HttpHeaders.CONTENT_TYPE, "application/json");
 		              System.out.println(blog.encode());
 		              ctx.response().end(blogComments.encode());
@@ -269,7 +265,6 @@ public class App extends AbstractVerticle
 		        ctx.fail(500);
 		        return;
 		      }
-		
 		      JsonObject user = lookup.result();
 		
 		      if (user != null) {
@@ -305,8 +300,9 @@ public class App extends AbstractVerticle
             System.out.println("Site Lookup result : " + lookup.result());
             if(lookup.result() != null) {
                 // already exists
-                // ctx.fail(500);
+                // do nothing
             } else {
+            	
             	JsonObject site = new JsonObject().put("companyId", companyId).put("siteName", defaultSiteName);
             	client.insert("site", site, insert -> {
                     // error handling
@@ -340,7 +336,7 @@ public class App extends AbstractVerticle
             System.out.println("Dept Lookup result : " + lookup.result());
             if(lookup.result() != null) {
                 // already exists
-                // ctx.fail(500);
+                // do nothing
             } else {
             	JsonObject dept = new JsonObject().put("companyId", companyId).put("siteId", siteId).put("deptName", deptName);
             	client.insert("dept", dept, insert -> {
@@ -395,19 +391,14 @@ public class App extends AbstractVerticle
             }
           });
   	  	
-  	  	// return companyId;
     }
     
     public void registerUser(Router router) {
     	router.post("/Services/rest/user/register").handler(ctx -> {
 
 		      JsonObject userDetails = ctx.getBodyAsJson();
-		      Boolean isCompany = userDetails.getBoolean("isCompany");
-		     
-		     		      
-		      if( userDetails.containsKey("isCompany") && isCompany) {
-		    	  
-		    	  
+		      Boolean isCompany = userDetails.getBoolean("isCompany"); 		      
+		      if( userDetails.containsKey("isCompany") && isCompany) {  
 		    	  vertx.executeBlocking(future -> {
 		    		  // Call some blocking API that takes a significant amount of time to return
 		    		  this.insertCompany(userDetails, userDetails.getString("deptName"), ctx);
@@ -452,8 +443,7 @@ public class App extends AbstractVerticle
 		                return;
 		              }
 		              this.userName = userDetails.getString("userName");
-		              
-		              
+
 		              // add the generated id to the user object
 		              userObj.put("id", insert.result());
 
@@ -600,9 +590,7 @@ public class App extends AbstractVerticle
 			@Override
 			public void handle(AsyncResult<String> stringAsyncResult) {
 				System.out.println("Verticle Deployment completed");
-				
 			}
-    		
     	});
     	
     }
